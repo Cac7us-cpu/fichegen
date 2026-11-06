@@ -95,4 +95,6 @@ pytest -q
 
 ## Licence
 
-Code sous licence MIT. Les fiches générées appartiennent à leurs utilisateurs, dans le respect des droits sur le matériel de cours d'origine.
+© 2026 Yann Nezien. **Tous droits réservés.** Le code est visible publiquement pour consultation uniquement : aucune copie, modification ou réutilisation n'est autorisée sans permission écrite (voir [`LICENSE`](LICENSE)).
+
+Les fiches générées appartiennent à leurs utilisateurs, dans le respect des droits sur le matériel de cours d'origine.
