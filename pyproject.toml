@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fichegen"
+version = "0.1.0"
+description = "Transforme des diapos de cours en fiches de révision LaTeX grâce à l'IA."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+dependencies = ["anthropic>=0.40", "pypdf>=4.0", "python-pptx>=0.6.23"]
+
+[project.scripts]
+fiche = "fichegen.cli:main"
+
+[tool.setuptools]
+packages = ["fichegen"]
+
+[tool.setuptools.package-data]
+fichegen = ["latex/*.tex"]

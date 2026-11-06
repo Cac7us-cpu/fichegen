@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block titre %}Connexion — {{ service }}{% endblock %}
+{% block contenu %}
+<div class="carte" style="max-width:440px;margin:0 auto">
+  <h1 style="font-size:1.6rem">Connexion</h1>
+  <form method="post" action="/connexion">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label for="email">Courriel</label>
+    <input id="email" type="email" name="email" required autocomplete="email">
+    <label for="mdp">Mot de passe</label>
+    <input id="mdp" type="password" name="mdp" required autocomplete="current-password">
+    <p><button class="btn">Se connecter</button></p>
+  </form>
+  <p class="aide">Pas encore de compte ? <a href="/inscription">Inscription</a></p>
+</div>
+{% endblock %}

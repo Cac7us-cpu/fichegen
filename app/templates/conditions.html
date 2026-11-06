@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block titre %}Conditions — {{ service }}{% endblock %}
+{% block contenu %}
+<div class="texte-legal">
+<h1>Conditions d'utilisation</h1>
+<p class="aide">Dernière mise à jour : à compléter. Ce texte est un modèle à faire relire avant le lancement commercial.</p>
+
+<h2>Le service</h2>
+<p>{{ service }} génère, à l'aide d'une intelligence artificielle, des fiches de révision à partir de documents de cours que tu fournis. Les fiches sont destinées à ton <strong>usage personnel d'étude</strong>.</p>
+
+<h2>Tes responsabilités</h2>
+<ul>
+  <li>Tu n'envoies que des documents auxquels tu as légitimement accès (par exemple, les diapos de tes propres cours).</li>
+  <li>Tu ne revends pas et ne publies pas les fiches générées à partir du matériel protégé d'un enseignant ou d'un éditeur.</li>
+  <li>Tu n'utilises pas le service pour tricher pendant une évaluation, ni d'une façon contraire aux règlements de ton établissement.</li>
+  <li>Tu n'essaies pas de contourner les limites, de surcharger ou d'attaquer le service.</li>
+</ul>
+
+<h2>Qualité des fiches</h2>
+<p>Les fiches sont générées automatiquement et peuvent contenir des erreurs ou des oublis. Vérifie toujours avec ton cours. Le service est fourni « tel quel », sans garantie de résultat scolaire.</p>
+
+<h2>Crédits et remboursements</h2>
+<p>1 crédit = 1 fiche. Les crédits n'expirent pas. Si une génération échoue, le crédit est remboursé automatiquement. Pour toute autre demande de remboursement, écris à <a href="mailto:{{ contact }}">{{ contact }}</a> dans les 14 jours suivant l'achat, pour les crédits non utilisés.</p>
+
+<h2>Suspension</h2>
+<p>Nous pouvons suspendre un compte qui ne respecte pas ces conditions.</p>
+
+<h2>Droit applicable</h2>
+<p>Ces conditions sont régies par les lois du Québec et du Canada.</p>
+</div>
+{% endblock %}

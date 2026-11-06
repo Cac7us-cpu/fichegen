@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block titre %}Tarifs — {{ service }}{% endblock %}
+{% block contenu %}
+<h1>Tarifs simples, sans abonnement</h1>
+<p class="lead">{{ credits_gratuits }} fiches gratuites pour essayer. Ensuite, achète des crédits seulement quand tu en as besoin. 1 crédit = 1 fiche. Les crédits n'expirent pas.</p>
+<div class="grille">
+{% for id, p in packs.items() %}
+  <div class="carte">
+    <h3 style="margin-top:0">{{ p.nom }}</h3>
+    <div class="prix">{{ '%.2f'|format(p.prix/100) }} $ <small>CAD</small></div>
+    <p>{{ p.credits }} fiches · {{ '%.2f'|format(p.prix/100/p.credits) }} $ / fiche</p>
+    <form method="post" action="/acheter/{{ id }}">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <button class="btn">Acheter</button>
+    </form>
+  </div>
+{% endfor %}
+</div>
+<p class="aide">Paiement sécurisé par Stripe. Nous ne voyons jamais ton numéro de carte. Si une génération échoue, ton crédit est remboursé automatiquement.</p>
+{% endblock %}

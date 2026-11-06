@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block titre %}{{ service }}{% endblock %}</title>
+<meta name="description" content="Transforme tes diapos de cours en fiches de révision claires, générées en LaTeX.">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="site"><div class="conteneur">
+  <a class="logo" href="/">Fiche<span>Gen</span></a>
+  <nav>
+    <a href="/tarifs">Tarifs</a>
+    {% if moi %}
+      <a href="/tableau">Mes fiches · {{ moi.credits }} crédit{{ 's' if moi.credits != 1 }}</a>
+      <form method="post" action="/deconnexion"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn lien">Déconnexion</button></form>
+    {% else %}
+      <a href="/connexion">Connexion</a>
+      <a class="btn" href="/inscription">Essayer gratuitement</a>
+    {% endif %}
+  </nav>
+</div></header>
+<main><div class="conteneur">
+  {% if message %}<div class="message">{{ message }}</div>{% endif %}
+  {% block contenu %}{% endblock %}
+</div></main>
+<footer><div class="conteneur">
+  <span>© {{ service }} — fait par un étudiant, pour les étudiants.</span>
+  <span><a href="/conditions">Conditions</a> · <a href="/confidentialite">Confidentialité</a> · <a href="mailto:{{ contact }}">Contact</a></span>
+</div></footer>
+</body>
+</html>

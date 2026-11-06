@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block titre %}Mes fiches — {{ service }}{% endblock %}
+{% block contenu %}
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+  <h1 style="margin:0">Nouvelle fiche</h1>
+  <div><span class="solde">{{ moi.credits }}</span> crédit{{ 's' if moi.credits != 1 }} · <a href="/tarifs">recharger</a></div>
+</div>
+{% if demo %}<p class="message">Mode démonstration : aucune clé API configurée, la fiche générée est un exemple fixe.</p>{% endif %}
+
+<form class="carte" method="post" action="/generer" enctype="multipart/form-data" id="form-fiche" style="margin-top:18px">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <label class="depot" id="depot">
+    <input type="file" name="fichier" accept=".pdf,.pptx,application/pdf" required id="fichier">
+    <strong id="nom-fichier">Clique ou glisse tes diapos ici</strong>
+    <div class="aide">PDF ou PowerPoint (.pptx) · {{ taille_max }} Mo max · 100 pages max</div>
+  </label>
+
+  <label for="titre">Titre de la fiche (optionnel)</label>
+  <input id="titre" type="text" name="titre" maxlength="120" placeholder="Ex. : Microéconomie — Chapitre 3">
+
+  <div class="grille" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+    <div><label for="niveau">Niveau de détail</label>
+      <select id="niveau" name="niveau">
+        <option value="synthetique">Synthétique (≈ 2 pages)</option>
+        <option value="standard" selected>Standard (3 à 5 pages)</option>
+        <option value="detaille">Détaillé</option>
+      </select></div>
+    <div><label for="langue">Langue</label>
+      <select id="langue" name="langue"><option>français</option><option>anglais</option></select></div>
+  </div>
+
+  <label for="consignes">Préférences (optionnel)</label>
+  <textarea id="consignes" name="consignes" maxlength="500" placeholder="Ex. : insiste sur les graphiques d'offre et de demande, ajoute plus d'exemples chiffrés…"></textarea>
+
+  <p><button class="btn" id="envoyer" {% if moi.credits < 1 %}disabled{% endif %}>Générer ma fiche (1 crédit)</button></p>
+  {% if moi.credits < 1 %}<p class="aide">Plus de crédits : <a href="/tarifs">choisis un pack</a>.</p>{% endif %}
+  <p class="aide">Utilise uniquement des documents de cours auxquels tu as légitimement accès. Tes diapos sont supprimées dès la fin du traitement.</p>
+</form>
+
+<details class="carte zone-danger" style="margin-top:30px">
+  <summary><strong>Supprimer mon compte</strong></summary>
+  <p>Toutes tes données (compte, crédits restants, historique) seront effacées définitivement.</p>
+  <form method="post" action="/compte/supprimer">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label for="conf">Écris SUPPRIMER pour confirmer</label>
+    <input id="conf" type="text" name="confirmation" autocomplete="off">
+    <p><button class="btn danger">Supprimer définitivement</button></p>
+  </form>
+</details>
+
+<script>
+const depot=document.getElementById('depot'),champ=document.getElementById('fichier'),nom=document.getElementById('nom-fichier');
+champ.addEventListener('change',()=>{if(champ.files[0])nom.textContent=champ.files[0].name});
+['dragenter','dragover'].forEach(e=>depot.addEventListener(e,ev=>{ev.preventDefault();depot.classList.add('survol')}));
+['dragleave','drop'].forEach(e=>depot.addEventListener(e,ev=>{ev.preventDefault();depot.classList.remove('survol')}));
+depot.addEventListener('drop',ev=>{if(ev.dataTransfer.files.length){champ.files=ev.dataTransfer.files;nom.textContent=champ.files[0].name}});
+document.getElementById('form-fiche').addEventListener('submit',()=>{const b=document.getElementById('envoyer');b.disabled=true;b.textContent='Envoi…'});
+</script>
+{% endblock %}

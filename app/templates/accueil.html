@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block contenu %}
+<section>
+  <span class="badge">{{ credits_gratuits }} fiches offertes à l'inscription</span>
+  <h1>Tes diapos de cours deviennent une fiche de révision en 2 minutes.</h1>
+  <p class="lead">Dépose le PDF ou le PowerPoint de ton prof. On en tire une fiche claire et bien structurée, mise en page en LaTeX : définitions, formules, méthodes, pièges fréquents et résumé final.</p>
+  <p><a class="btn" href="{{ '/tableau' if moi else '/inscription' }}">Créer ma première fiche</a>
+     <a class="btn secondaire" href="/tarifs">Voir les tarifs</a></p>
+</section>
+
+<h2>Comment ça marche</h2>
+<ol class="etapes">
+  <li><strong>Dépose tes diapos</strong><br>PDF ou PPTX, jusqu'à 100 pages.</li>
+  <li><strong>Choisis le niveau</strong><br>Synthétique, standard ou détaillé.</li>
+  <li><strong>Télécharge ta fiche</strong><br>Un PDF propre, avec de vraies formules mathématiques.</li>
+</ol>
+
+<h2>Pourquoi c'est différent</h2>
+<div class="grille">
+  <div class="carte"><strong>Formules impeccables</strong><p>Rendu LaTeX, comme dans un manuel. Idéal en économie, maths, stats et finance.</p></div>
+  <div class="carte"><strong>Structure pensée pour réviser</strong><p>Encadrés de couleur : définition, formule clé, méthode, exemple, piège.</p></div>
+  <div class="carte"><strong>Tes fichiers restent privés</strong><p>Tes diapos sont supprimées dès que la fiche est prête. Rien n'est partagé ni revendu.</p></div>
+</div>
+{% endblock %}

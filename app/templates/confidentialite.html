@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block titre %}Confidentialité — {{ service }}{% endblock %}
+{% block contenu %}
+<div class="texte-legal">
+<h1>Politique de confidentialité</h1>
+<p class="aide">Dernière mise à jour : à compléter. Ce texte est un modèle à faire relire avant le lancement commercial.</p>
+
+<h2>Responsable de la protection des renseignements personnels</h2>
+<p>{{ responsable }} — <a href="mailto:{{ contact }}">{{ contact }}</a>. Tu peux écrire à cette adresse pour toute question, demande d'accès, de rectification ou de suppression.</p>
+
+<h2>Ce que nous collectons</h2>
+<ul>
+  <li><strong>Ton compte :</strong> ton adresse courriel et ton mot de passe (stocké chiffré, nous ne pouvons pas le lire).</li>
+  <li><strong>Tes crédits et achats :</strong> le pack acheté, le montant et la date (obligation comptable).</li>
+  <li><strong>Des statistiques techniques :</strong> date de chaque génération, nombre de pages, succès ou échec.</li>
+</ul>
+<p>Nous ne collectons <strong>pas</strong> tes données bancaires : le paiement se fait directement chez Stripe.</p>
+
+<h2>Tes diapos et tes fiches</h2>
+<p>Tes diapos sont traitées en mémoire, envoyées au service d'IA pour générer la fiche, puis supprimées. La fiche générée reste disponible 30 minutes pour le téléchargement, puis elle est effacée. Nous n'en gardons aucune copie et nous ne les partageons avec personne.</p>
+
+<h2>Fournisseurs (sous-traitants)</h2>
+<ul>
+  <li><strong>Anthropic</strong> (États-Unis) : analyse des diapos par l'IA Claude. Selon ses conditions commerciales, les données envoyées via son API ne servent pas à entraîner ses modèles par défaut.</li>
+  <li><strong>Stripe</strong> (États-Unis / Irlande) : traitement des paiements.</li>
+  <li><strong>Hébergeur du site</strong> : à préciser.</li>
+</ul>
+<p>Ces fournisseurs peuvent traiter des renseignements à l'extérieur du Québec, avec des protections contractuelles adéquates.</p>
+
+<h2>Durée de conservation</h2>
+<p>Ton compte est conservé tant qu'il est actif. Tu peux le supprimer à tout moment depuis ta page « Mes fiches ». Les traces d'achats sont anonymisées et conservées pour la comptabilité.</p>
+
+<h2>Témoins (cookies)</h2>
+<p>Un seul témoin est utilisé, pour te garder connecté. Aucun témoin publicitaire ni de traçage.</p>
+
+<h2>Tes droits</h2>
+<p>Conformément à la Loi sur la protection des renseignements personnels dans le secteur privé du Québec (Loi 25), tu peux accéder à tes renseignements, les faire corriger ou les faire supprimer. Tu peux aussi porter plainte auprès de la Commission d'accès à l'information du Québec.</p>
+</div>
+{% endblock %}

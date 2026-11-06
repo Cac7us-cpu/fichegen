@@ -1,0 +1,23 @@
+# Secrets — ne jamais publier
+.env
+*.env
+!.env.example
+
+# Données locales
+donnees/
+*.db
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# LaTeX
+*.aux
+*.log
+*.out
+*_fiche.pdf
+*_fiche.tex

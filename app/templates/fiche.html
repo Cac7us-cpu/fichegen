@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block titre %}Ta fiche — {{ service }}{% endblock %}
+{% block contenu %}
+<div class="carte centre" style="max-width:520px;margin:0 auto" id="boite">
+  <div id="attente" {% if t.statut != 'en_cours' %}hidden{% endif %}>
+    <h1 style="font-size:1.5rem">Ta fiche est en préparation</h1>
+    <div class="spinner"></div>
+    <p id="etape">{{ t.etape }}</p>
+    <p class="aide">Ça prend en général 1 à 3 minutes. Tu peux laisser cette page ouverte.</p>
+  </div>
+  <div id="ok" {% if t.statut != 'termine' %}hidden{% endif %}>
+    <h1 style="font-size:1.5rem">Ta fiche est prête</h1>
+    <p><a class="btn" href="/fiche/{{ gid }}/pdf">Télécharger le PDF</a></p>
+    <p class="aide">Le lien expire dans 30 minutes : nous ne conservons pas tes fiches.</p>
+    <p><a href="/tableau">Créer une autre fiche</a></p>
+  </div>
+  <div id="ko" {% if t.statut != 'echec' %}hidden{% endif %}>
+    <h1 style="font-size:1.5rem">Oups, la génération a échoué</h1>
+    <p id="erreur">{{ t.erreur or '' }}</p>
+    <p><a class="btn" href="/tableau">Réessayer</a></p>
+  </div>
+</div>
+<script>
+(async function suivre(){
+  if(document.getElementById('attente').hidden) return;
+  try{
+    const r=await fetch('/fiche/{{ gid }}/statut',{cache:'no-store'});
+    if(r.ok){const d=await r.json();
+      document.getElementById('etape').textContent=d.etape;
+      if(d.statut==='termine'){document.getElementById('attente').hidden=true;document.getElementById('ok').hidden=false;return}
+      if(d.statut==='echec'){document.getElementById('attente').hidden=true;document.getElementById('erreur').textContent=d.erreur;document.getElementById('ko').hidden=false;return}
+    }
+  }catch(e){}
+  setTimeout(suivre,2000);
+})();
+</script>
+{% endblock %}
