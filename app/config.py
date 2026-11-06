@@ -56,3 +56,7 @@ PACKS = {
 DEVISE = "cad"
 
 PRODUCTION = URL_SITE.startswith("https://")
+
+# Origines autorisées à appeler l'API depuis un navigateur (tests de l'app en version web).
+# Les applications iPhone/Android n'en ont pas besoin. Ex. : http://localhost:8081
+CORS_ORIGINES = [o.strip() for o in os.environ.get("CORS_ORIGINES", "").split(",") if o.strip()]

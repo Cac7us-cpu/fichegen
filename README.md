@@ -7,7 +7,8 @@ L'étudiant dépose le PDF ou le PowerPoint de son cours. L'IA (Claude, d'Anthro
 Le projet contient :
 
 - **un site web** avec comptes, fiches gratuites à l'inscription, crédits payants (Stripe) et limites anti-abus ;
-- **une commande terminal** `fiche` pour générer une fiche directement depuis ton ordi.
+- **une commande terminal** `fiche` pour générer une fiche directement depuis ton ordi ;
+- **une application mobile** iPhone et Android (dossier [`mobile/`](mobile/README.md)).
 
 ---
 
@@ -65,6 +66,8 @@ Diapos (PDF/PPTX) ──► extraction ──► Claude rédige le CORPS LaTeX
 | `fichegen/latex.py` | Assemblage et compilation **sécurisée** |
 | `fichegen/latex/preambule.tex` | **Le style des fiches** : modifie-le pour changer le design |
 | `app/` | Site web (FastAPI) : comptes, crédits, Stripe, pages |
+| `app/api.py` | API pour l'application mobile (connexion par jeton) |
+| `mobile/` | Application iPhone / Android (Expo) |
 | `tests/` | Tests automatiques (`pytest`) |
 
 ## Sécurité et confidentialité
@@ -80,6 +83,8 @@ Diapos (PDF/PPTX) ──► extraction ──► Claude rédige le CORPS LaTeX
 ## Déploiement
 
 Voir [`docs/DEPLOIEMENT.md`](docs/DEPLOIEMENT.md) : hébergement avec Docker, configuration de Stripe, liste de vérification avant lancement.
+
+Pour l'application mobile : [`docs/PUBLIER_APP.md`](docs/PUBLIER_APP.md).
 
 ## Tests
 

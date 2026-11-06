@@ -36,6 +36,10 @@ app = FastAPI(title=config.NOM_SERVICE, docs_url=None, redoc_url=None, openapi_u
 app.add_middleware(SessionMiddleware, secret_key=config.SECRET_KEY, same_site="lax",
                    https_only=config.PRODUCTION, max_age=60 * 60 * 24 * 14)
 app.mount("/static", StaticFiles(directory=ICI / "static"), name="static")
+if config.CORS_ORIGINES:  # seulement pour tester l'app mobile dans un navigateur
+    from fastapi.middleware.cors import CORSMiddleware
+    app.add_middleware(CORSMiddleware, allow_origins=config.CORS_ORIGINES,
+                       allow_methods=["*"], allow_headers=["*"])
 gabarits = Jinja2Templates(directory=ICI / "templates")
 gabarits.env.globals.update(service=config.NOM_SERVICE, packs=config.PACKS,
                             contact=config.CONTACT, credits_gratuits=config.CREDITS_GRATUITS)
@@ -213,28 +217,39 @@ async def generer(request: Request, fichier: UploadFile = File(...), titre: str 
     moi = _moi(request)
     if not moi:
         return _rediriger("/connexion")
-    uid = moi["id"]
-
-    if bd.generation_en_cours(uid):
-        return _rediriger("/tableau", "Une fiche est déjà en cours. Attends qu'elle se termine.", request)
-    if bd.nb_generations_depuis(3600, uid) >= config.FICHES_PAR_HEURE:
-        return _rediriger("/tableau", "Limite horaire atteinte, réessaie un peu plus tard.", request)
-    if bd.nb_generations_depuis(86400) >= config.FICHES_PAR_JOUR_TOTAL:
-        return _rediriger("/tableau", "Le service est très sollicité aujourd'hui. Réessaie demain.", request)
-
     data = await fichier.read(config.TAILLE_MAX_MO * 1024 * 1024 + 1)
+    gid, erreur, retour = lancer_generation(moi["id"], fichier.filename or "", data,
+                                            titre, niveau, langue, consignes)
+    if erreur:
+        return _rediriger(retour, erreur, request)
+    return RedirectResponse(f"/fiche/{gid}", status_code=303)
+
+
+def lancer_generation(uid: int, nom_fichier: str, data: bytes, titre: str, niveau: str,
+                      langue: str, consignes: str) -> tuple[str | None, str | None, str]:
+    """Vérifie les limites, réserve un crédit et lance la génération en arrière-plan.
+
+    Partagé par le site web et l'API mobile.
+    Renvoie (identifiant, None, "") si tout va bien, sinon (None, message d'erreur, page de retour).
+    """
+    if bd.generation_en_cours(uid):
+        return None, "Une fiche est déjà en cours. Attends qu'elle se termine.", "/tableau"
+    if bd.nb_generations_depuis(3600, uid) >= config.FICHES_PAR_HEURE:
+        return None, "Limite horaire atteinte, réessaie un peu plus tard.", "/tableau"
+    if bd.nb_generations_depuis(86400) >= config.FICHES_PAR_JOUR_TOTAL:
+        return None, "Le service est très sollicité aujourd'hui. Réessaie demain.", "/tableau"
     if len(data) > config.TAILLE_MAX_MO * 1024 * 1024:
-        return _rediriger("/tableau", f"Fichier trop lourd (max {config.TAILLE_MAX_MO} Mo).", request)
+        return None, f"Fichier trop lourd (max {config.TAILLE_MAX_MO} Mo).", "/tableau"
     try:
-        diapos = lire_diapos(fichier.filename or "", data)
+        diapos = lire_diapos(nom_fichier, data)
     except FichierInvalide as e:
-        return _rediriger("/tableau", str(e), request)
+        return None, str(e), "/tableau"
     del data
 
     if not bd.reserver_credit(uid):
-        return _rediriger("/tarifs", "Tu n'as plus de crédits. Choisis un pack pour continuer.", request)
+        return None, "Tu n'as plus de crédits. Choisis un pack pour continuer.", "/tarifs"
 
-    titre = (titre.strip() or Path(fichier.filename or "Fiche").stem.replace("_", " "))[:120]
+    titre = (titre.strip() or Path(nom_fichier or "Fiche").stem.replace("_", " "))[:120]
     opts = Options(titre=titre, niveau=niveau if niveau in NIVEAUX else "standard",
                    langue=langue if langue in ("français", "anglais") else "français",
                    consignes=consignes[:500])
@@ -260,7 +275,7 @@ async def generer(request: Request, fichier: UploadFile = File(...), titre: str 
 
     _nettoyer_travaux()
     _executeur.submit(tache)
-    return RedirectResponse(f"/fiche/{gid}", status_code=303)
+    return gid, None, ""
 
 
 def _travail(request: Request, gid: str) -> dict:
@@ -318,3 +333,9 @@ async def webhook(request: Request):
     if not ok:
         raise HTTPException(400, "Signature invalide")
     return {"recu": True}
+
+
+# ---------------------------------------------------------------- API mobile
+from .api import routeur as routeur_api  # noqa: E402  (importé après lancer_generation)
+
+app.include_router(routeur_api)
