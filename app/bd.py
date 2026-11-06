@@ -1,4 +1,8 @@
-"""Base de données SQLite.
+"""Base de données : SQLite (par défaut) ou PostgreSQL (si DATABASE_URL est défini).
+
+- En local : un simple fichier SQLite, rien à installer.
+- En ligne gratuitement : une base PostgreSQL gratuite (ex. Neon), car les
+  hébergeurs gratuits effacent les fichiers à chaque redémarrage.
 
 Principe de minimisation (Loi 25) : on ne stocke NI les diapos NI les fiches.
 Seulement : le compte (email + mot de passe chiffré), les crédits,
@@ -15,14 +19,25 @@ from pathlib import Path
 from . import config
 
 _verrou = threading.Lock()
+POSTGRES = config.DATABASE_URL.startswith(("postgres://", "postgresql://"))
 
-SCHEMA = """
+if POSTGRES:
+    import psycopg
+    from psycopg.rows import dict_row
+    ERREURS_DOUBLON: tuple = (sqlite3.IntegrityError, psycopg.errors.UniqueViolation)
+else:
+    ERREURS_DOUBLON = (sqlite3.IntegrityError,)
+
+_ID = "BIGSERIAL PRIMARY KEY" if POSTGRES else "INTEGER PRIMARY KEY"
+_DATE = "DOUBLE PRECISION" if POSTGRES else "REAL"
+
+SCHEMA = f"""
 CREATE TABLE IF NOT EXISTS utilisateurs (
-    id INTEGER PRIMARY KEY,
+    id {_ID},
     email TEXT UNIQUE NOT NULL,
     mdp_hash TEXT NOT NULL,
     credits INTEGER NOT NULL DEFAULT 0,
-    cree_le REAL NOT NULL
+    cree_le {_DATE} NOT NULL
 );
 CREATE TABLE IF NOT EXISTS achats (
     stripe_session TEXT PRIMARY KEY,
@@ -31,7 +46,7 @@ CREATE TABLE IF NOT EXISTS achats (
     credits INTEGER,
     montant INTEGER,
     devise TEXT,
-    cree_le REAL NOT NULL
+    cree_le {_DATE} NOT NULL
 );
 CREATE TABLE IF NOT EXISTS generations (
     id TEXT PRIMARY KEY,
@@ -40,33 +55,48 @@ CREATE TABLE IF NOT EXISTS generations (
     pages INTEGER,
     tokens_entree INTEGER DEFAULT 0,
     tokens_sortie INTEGER DEFAULT 0,
-    cree_le REAL NOT NULL
+    cree_le {_DATE} NOT NULL
 );
-CREATE INDEX IF NOT EXISTS idx_gen_user ON generations(utilisateur_id, cree_le);
+CREATE INDEX IF NOT EXISTS idx_gen_user ON generations(utilisateur_id, cree_le)
 """
 
 
-def _connexion() -> sqlite3.Connection:
-    Path(config.CHEMIN_BD).parent.mkdir(parents=True, exist_ok=True)
-    c = sqlite3.connect(config.CHEMIN_BD, timeout=10)
-    c.row_factory = sqlite3.Row
-    return c
+class _Connexion:
+    """Petite enveloppe : même code SQL pour SQLite et PostgreSQL."""
+
+    def __init__(self):
+        if POSTGRES:
+            self.c = psycopg.connect(config.DATABASE_URL, row_factory=dict_row)
+        else:
+            Path(config.CHEMIN_BD).parent.mkdir(parents=True, exist_ok=True)
+            self.c = sqlite3.connect(config.CHEMIN_BD, timeout=10)
+            self.c.row_factory = sqlite3.Row
+
+    def execute(self, sql: str, params: tuple = ()):
+        if POSTGRES:
+            sql = sql.replace("?", "%s")
+        return self.c.execute(sql, params)
+
+    def rollback(self):
+        self.c.rollback()
 
 
 @contextmanager
 def bd():
     with _verrou:
-        c = _connexion()
+        c = _Connexion()
         try:
             yield c
-            c.commit()
+            c.c.commit()
         finally:
-            c.close()
+            c.c.close()
 
 
 def initialiser() -> None:
     with bd() as c:
-        c.executescript(SCHEMA)
+        for instruction in SCHEMA.split(";"):
+            if instruction.strip():
+                c.execute(instruction)
 
 
 # ---------- Utilisateurs ----------
@@ -74,10 +104,11 @@ def creer_utilisateur(email: str, mdp_hash: str) -> int | None:
     with bd() as c:
         try:
             cur = c.execute(
-                "INSERT INTO utilisateurs(email, mdp_hash, credits, cree_le) VALUES (?,?,?,?)",
+                "INSERT INTO utilisateurs(email, mdp_hash, credits, cree_le) VALUES (?,?,?,?) RETURNING id",
                 (email, mdp_hash, config.CREDITS_GRATUITS, time.time()))
-            return cur.lastrowid
-        except sqlite3.IntegrityError:
+            return cur.fetchone()["id"]
+        except ERREURS_DOUBLON:
+            c.rollback()
             return None
 
 
@@ -118,7 +149,8 @@ def enregistrer_achat(session_id: str, uid: int, pack: str, credits: int, montan
         try:
             c.execute("INSERT INTO achats VALUES (?,?,?,?,?,?,?)",
                       (session_id, uid, pack, credits, montant, devise, time.time()))
-        except sqlite3.IntegrityError:
+        except ERREURS_DOUBLON:
+            c.rollback()
             return False
         c.execute("UPDATE utilisateurs SET credits=credits+? WHERE id=?", (credits, uid))
         return True
@@ -141,13 +173,13 @@ def nb_generations_depuis(secondes: int, uid: int | None = None) -> int:
     limite = time.time() - secondes
     with bd() as c:
         if uid is None:
-            return c.execute("SELECT COUNT(*) FROM generations WHERE cree_le>?", (limite,)).fetchone()[0]
-        return c.execute("SELECT COUNT(*) FROM generations WHERE utilisateur_id=? AND cree_le>?",
-                         (uid, limite)).fetchone()[0]
+            return c.execute("SELECT COUNT(*) AS n FROM generations WHERE cree_le>?", (limite,)).fetchone()["n"]
+        return c.execute("SELECT COUNT(*) AS n FROM generations WHERE utilisateur_id=? AND cree_le>?",
+                         (uid, limite)).fetchone()["n"]
 
 
 def generation_en_cours(uid: int) -> bool:
     with bd() as c:
         return c.execute(
-            "SELECT 1 FROM generations WHERE utilisateur_id=? AND statut='en_cours' AND cree_le>?",
+            "SELECT 1 AS x FROM generations WHERE utilisateur_id=? AND statut='en_cours' AND cree_le>?",
             (uid, time.time() - 900)).fetchone() is not None

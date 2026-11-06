@@ -27,6 +27,20 @@ git push -u origin main
 
 ## 3. Héberger le site
 
+### Option gratuite (pour démarrer) : Render + Neon
+
+1. **Base de données** : crée un compte sur https://neon.com (offre gratuite), crée un projet, puis copie
+   l'adresse de connexion (elle commence par `postgresql://`).
+2. **Site** : sur https://render.com, connecte-toi avec GitHub, puis *New > Blueprint* et choisis le dépôt.
+   Le fichier `render.yaml` configure tout. Colle l'adresse Neon dans `DATABASE_URL` et ta clé dans
+   `ANTHROPIC_API_KEY`.
+
+Limites de l'offre gratuite : le site s'endort après 15 minutes sans visite (le premier chargement
+suivant prend environ une minute). Les comptes et crédits sont en sécurité dans Neon.
+L'IA, elle, reste payante à l'usage (console Anthropic).
+
+### Option payante (plus rapide, sans mise en veille)
+
 Le `Dockerfile` installe tout, y compris LaTeX. N'importe quel hébergeur Docker convient : Render, Railway, Fly.io, ou un petit serveur DigitalOcean.
 
 Exemple avec **Render** :

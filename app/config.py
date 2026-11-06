@@ -40,6 +40,8 @@ CLAUDE_MODEL = os.environ.get("CLAUDE_MODEL", "claude-sonnet-4-5")
 STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "")
 STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
 CHEMIN_BD = os.environ.get("CHEMIN_BD", "donnees/fichegen.db")
+# Base PostgreSQL (ex. Neon, gratuit). Si vide, on utilise le fichier SQLite ci-dessus.
+DATABASE_URL = os.environ.get("DATABASE_URL", "").strip()
 CONTACT = os.environ.get("CONTACT_EMAIL", "contact@example.com")
 RESPONSABLE_RP = os.environ.get("RESPONSABLE_RP", "Le fondateur de FicheGen")
 

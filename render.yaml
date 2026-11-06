@@ -1,19 +1,18 @@
-# Déploiement en un clic sur Render (render.com > New > Blueprint).
+# Déploiement GRATUIT en un clic sur Render (render.com > New > Blueprint).
+# La base de données est sur Neon (gratuit) : colle son adresse dans DATABASE_URL.
 # Les clés secrètes ne sont PAS ici : Render te les demandera pendant la création.
 services:
   - type: web
     name: fichegen
     runtime: docker
-    plan: starter
+    plan: free
     region: ohio
     healthCheckPath: /sante
-    disk:
-      name: donnees
-      mountPath: /srv/donnees
-      sizeGB: 1
     envVars:
       - key: SECRET_KEY
         generateValue: true
+      - key: DATABASE_URL
+        sync: false
       - key: ANTHROPIC_API_KEY
         sync: false
       - key: CONTACT_EMAIL
