@@ -31,7 +31,9 @@ def _int(nom: str, defaut: int) -> int:
 
 
 NOM_SERVICE = os.environ.get("NOM_SERVICE", "FicheGen")
-URL_SITE = os.environ.get("URL_SITE", "http://localhost:8000").rstrip("/")
+# Sur Render, RENDER_EXTERNAL_URL est fourni automatiquement (ex. https://fichegen.onrender.com).
+URL_SITE = (os.environ.get("URL_SITE") or os.environ.get("RENDER_EXTERNAL_URL")
+            or "http://localhost:8000").rstrip("/")
 SECRET_KEY = os.environ.get("SECRET_KEY", "")
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 CLAUDE_MODEL = os.environ.get("CLAUDE_MODEL", "claude-sonnet-4-5")

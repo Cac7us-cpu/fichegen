@@ -1,0 +1,32 @@
+# Déploiement en un clic sur Render (render.com > New > Blueprint).
+# Les clés secrètes ne sont PAS ici : Render te les demandera pendant la création.
+services:
+  - type: web
+    name: fichegen
+    runtime: docker
+    plan: starter
+    region: ohio
+    healthCheckPath: /sante
+    disk:
+      name: donnees
+      mountPath: /srv/donnees
+      sizeGB: 1
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: CONTACT_EMAIL
+        sync: false
+      - key: RESPONSABLE_RP
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: CLAUDE_MODEL
+        value: claude-sonnet-4-5
+      - key: CREDITS_GRATUITS
+        value: "3"
+      - key: FICHES_PAR_JOUR_TOTAL
+        value: "100"
